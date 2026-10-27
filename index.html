@@ -3,59 +3,499 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Giemmeci.22</title>
+<meta name="theme-color" content="#367f60">
+<title>Giemmeci.22 - Gestione magazzino</title>
+
 <style>
-body{font-family:Arial;background:#f1f5f5;margin:0;color:#18343b}
-header{background:#087f5b;color:white;padding:24px;font-size:25px;font-weight:bold}
-main{padding:16px}
-button{padding:16px;border:0;border-radius:10px;font-weight:bold;font-size:16px;width:100%;margin:6px 0}
-.verde{background:#087f5b;color:white}
-.rosso{background:#d94848;color:white}
-input,select{width:100%;padding:13px;box-sizing:border-box;margin:6px 0 14px;border:1px solid #ccd8d9;border-radius:8px;font-size:16px}
-.box{background:white;padding:16px;border-radius:12px;margin:12px 0}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#f1f5f4;
+  color:#20343a;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
+}
+
+header{
+  background:#367f60;
+  color:white;
+  padding:28px 20px
+}
+
+header h1{margin:0 0 8px;font-size:29px}
+header p{margin:0;font-size:19px}
+
+main{
+  max-width:760px;
+  margin:auto;
+  padding:16px 14px 40px
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:22px 18px;
+  margin-bottom:18px
+}
+
+h2{font-size:25px;margin:0 0 18px}
+
+label{
+  display:block;
+  font-weight:600;
+  margin:14px 0 7px
+}
+
+input,select{
+  width:100%;
+  font:inherit;
+  padding:13px;
+  border:1px solid #dce5e2;
+  border-radius:11px;
+  min-height:48px;
+  background:white;
+  color:#20343a
+}
+
+button{
+  font:inherit;
+  font-weight:650;
+  border:0;
+  border-radius:12px;
+  padding:12px;
+  cursor:pointer
+}
+
+.primary{
+  width:100%;
+  background:#367f60;
+  color:white;
+  margin-top:18px
+}
+
+.secondary{background:#e8efec;color:#20343a}
+.danger{background:#fae8e8;color:#9b382a}
+
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:12px;
+  flex-wrap:wrap
+}
+
+.movement{
+  border:1px solid #dce5e2;
+  border-radius:14px;
+  padding:15px;
+  margin-top:12px
+}
+
+.movement h3{margin:0 0 7px;font-size:19px}
+
+.meta{
+  line-height:1.55;
+  color:#43565b;
+  overflow-wrap:anywhere
+}
+
+.badge{
+  display:inline-block;
+  border-radius:20px;
+  padding:4px 9px;
+  font-size:13px;
+  font-weight:700;
+  margin-bottom:8px
+}
+
+.in{background:#e0f3e8;color:#236b48}
+.out{background:#fbe8e4;color:#9b382a}
+
+.note,.empty{
+  font-size:14px;
+  color:#66777b;
+  line-height:1.5
+}
+
+.hidden{display:none!important}
+
+.searchrow{
+  display:flex;
+  gap:8px
+}
+
+.searchrow input{
+  min-width:0;
+  flex:1
+}
 </style>
 </head>
+
 <body>
-<header>Giemmeci.22<br><small>Gestione magazzino</small></header>
+
+<header>
+  <h1>Giemmeci.22</h1>
+  <p>Gestione magazzino</p>
+</header>
+
 <main>
-<div id="inizio" class="box">
-<h2>Elenco mobilifici</h2>
-<div id="clienti">Nessun mobilificio registrato.</div>
-<button class="verde" onclick="nuovo()">+ Nuovo movimento</button>
-</div>
-<div id="form" class="box" style="display:none">
-<h2 id="titolo">Nuovo movimento</h2>
-<button class="verde" onclick="tipo='Entrata';document.getElementById('titolo').innerText='Entrata merce'">ENTRATA MERCE</button>
-<button class="rosso" onclick="tipo='Uscita';document.getElementById('titolo').innerText='Uscita merce'">USCITA MERCE</button>
-<label>Data</label><input id="data" type="date">
-<label>Mobilificio</label><input id="mobilificio" placeholder="Nome mobilificio">
-<label>Azienda</label><input id="azienda" placeholder="Nome azienda">
-<label>Riferimento</label><input id="riferimento" placeholder="Numero o codice riferimento">
-<label>Numero colli</label><input id="colli" type="number" min="1" placeholder="Numero colli">
-<label>Note</label><input id="note" placeholder="Note facoltative">
-<button class="verde" onclick="salva()">SALVA MOVIMENTO</button>
-<button onclick="mostra()">ANNULLA</button>
-</div>
-<div class="box">
-<h2>Storico movimenti</h2>
-<div id="storico">Nessun movimento registrato.</div>
-</div>
+
+<section class="card" id="formcard">
+  <h2 id="formtitle">Nuovo movimento</h2>
+
+  <form id="form">
+
+    <label for="mobilificio">Mobilificio</label>
+    <input id="mobilificio" required placeholder="Es. Albanese">
+
+    <label for="tipo">Tipo movimento</label>
+    <select id="tipo">
+      <option>Entrata</option>
+      <option>Uscita</option>
+    </select>
+
+    <label for="data">Data</label>
+    <input id="data" type="date" required>
+
+    <label for="riferimento">Riferimento / Expo</label>
+    <input id="riferimento" placeholder="Es. Expo">
+
+    <label for="colli">Colli</label>
+    <input id="colli" type="number" min="0" step="1"
+           required placeholder="Es. 35">
+
+    <button class="primary" id="submit" type="submit">
+      + Salva movimento
+    </button>
+
+    <button class="secondary hidden" id="cancel"
+            type="button" style="width:100%;margin-top:8px">
+      Annulla modifica
+    </button>
+
+  </form>
+</section>
+
+<section class="card">
+
+  <h2>Storico movimenti</h2>
+
+  <label for="search">Cerca nei movimenti</label>
+
+  <div class="searchrow">
+    <input id="search" type="search"
+           placeholder="Mobilificio, data, riferimento…">
+
+    <button class="secondary" id="clear" type="button">
+      Pulisci
+    </button>
+  </div>
+
+  <p class="note" id="count"></p>
+
+  <div id="list"></div>
+
+  <p class="note">
+    I movimenti vengono salvati nel browser di questo dispositivo.
+    Non si sincronizzano automaticamente con altri dispositivi.
+  </p>
+
+</section>
+
 </main>
+
 <script>
-let tipo='Entrata';
-let movimenti=JSON.parse(localStorage.getItem('gm22')||'[]');
-function nuovo(){document.getElementById('form').style.display='block';document.getElementById('data').value=new Date().toISOString().slice(0,10)}
-function mostra(){document.getElementById('form').style.display='none'}
-function salva(){
-let m={tipo:tipo,data:data.value,cliente:mobilificio.value.trim(),azienda:azienda.value.trim(),riferimento:riferimento.value.trim(),colli:colli.value,note:note.value};
-if(!m.cliente||!m.azienda||!m.riferimento||!m.colli||Number(m.colli)<1){alert('Compila mobilificio, azienda, riferimento e colli.');return}
-movimenti.push(m);localStorage.setItem('gm22',JSON.stringify(movimenti));aggiorna();mostra();
+const $ = id => document.getElementById(id);
+const KEY = "giemmeci22_movimenti_v1";
+
+let items = [];
+let editing = null;
+
+const today = () => {
+  const d = new Date();
+  const offset = d.getTimezoneOffset();
+  return new Date(d.getTime() - offset * 60000)
+    .toISOString().slice(0,10);
+};
+
+const newId = () =>
+  Date.now().toString(36) +
+  Math.random().toString(36).slice(2,7);
+
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
+  })[c]);
 }
-function aggiorna(){
-let clienti=[...new Set(movimenti.map(m=>m.cliente))];
-document.getElementById('clienti').innerHTML=clienti.length?clienti.map(c=>'<div class="box">'+c+'</div>').join(''):'Nessun mobilificio registrato.';
-document.getElementById('storico').innerHTML=movimenti.length?[...movimenti].reverse().map(m=>'<div class="box"><b>'+m.tipo+' — '+m.cliente+'</b><br>'+m.data+' · '+m.azienda+'<br>Rif. '+m.riferimento+' · Colli: '+m.colli+(m.note?'<br>'+m.note:'')+'</div>').join(''):'Nessun movimento registrato.';
+
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(items));
 }
-aggiorna();
+
+function formatDate(value){
+  if(!value) return "—";
+
+  const p = value.split("-");
+
+  return p.length === 3
+    ? `${p[2]}/${p[1]}/${p[0]}`
+    : value;
+}
+
+/* RICERCA E VISUALIZZAZIONE */
+
+function render(){
+
+  const query = $("search").value
+    .trim()
+    .toLocaleLowerCase("it");
+
+  const filtered = items.filter(m => {
+
+    const text = [
+      m.mobilificio,
+      m.tipo,
+      m.data,
+      formatDate(m.data),
+      m.riferimento,
+      m.colli
+    ].join(" ").toLocaleLowerCase("it");
+
+    return text.includes(query);
+  });
+
+  $("count").textContent =
+    `${filtered.length} di ${items.length} movimenti`;
+
+  if(!filtered.length){
+
+    $("list").innerHTML =
+      '<p class="empty">Nessun movimento trovato.</p>';
+
+    return;
+  }
+
+  $("list").innerHTML = filtered
+    .slice()
+    .sort((a,b) => (b.data || "").localeCompare(a.data || ""))
+    .map(m => `
+      <article class="movement">
+
+        <span class="badge ${m.tipo === "Entrata" ? "in" : "out"}">
+          ${escapeHTML(m.tipo)}
+        </span>
+
+        <h3>${escapeHTML(m.mobilificio)}</h3>
+
+        <div class="meta">
+          ${escapeHTML(formatDate(m.data))}<br>
+          Riferimento: ${escapeHTML(m.riferimento || "—")}
+          · Colli: ${escapeHTML(m.colli)}
+        </div>
+
+        <div class="actions">
+
+          <button class="secondary"
+                  type="button"
+                  data-edit="${escapeHTML(m.id)}">
+            Modifica
+          </button>
+
+          <button class="danger"
+                  type="button"
+                  data-del="${escapeHTML(m.id)}">
+            Elimina
+          </button>
+
+        </div>
+
+      </article>
+    `).join("");
+}
+
+/* RESET DEL MODULO */
+
+function resetForm(){
+
+  editing = null;
+
+  $("form").reset();
+  $("data").value = today();
+
+  $("formtitle").textContent = "Nuovo movimento";
+  $("submit").textContent = "+ Salva movimento";
+
+  $("cancel").classList.add("hidden");
+}
+
+/* AGGIUNTA E MODIFICA */
+
+$("form").addEventListener("submit", function(e){
+
+  e.preventDefault();
+
+  const m = {
+    id: editing || newId(),
+    mobilificio: $("mobilificio").value.trim(),
+    tipo: $("tipo").value,
+    data: $("data").value,
+    riferimento: $("riferimento").value.trim(),
+    colli: Number($("colli").value)
+  };
+
+  if(!m.mobilificio || !m.data || m.colli < 0){
+    alert("Controlla i dati inseriti.");
+    return;
+  }
+
+  if(editing){
+
+    items = items.map(old =>
+      old.id === editing ? m : old
+    );
+
+  }else{
+
+    items.push(m);
+
+  }
+
+  save();
+  resetForm();
+  render();
+
+});
+
+/* PULSANTI MODIFICA ED ELIMINA */
+
+$("list").addEventListener("click", function(e){
+
+  const button = e.target.closest("button");
+
+  if(!button) return;
+
+  /* MODIFICA */
+
+  if(button.dataset.edit){
+
+    const m = items.find(
+      x => x.id === button.dataset.edit
+    );
+
+    if(!m) return;
+
+    editing = m.id;
+
+    $("mobilificio").value = m.mobilificio || "";
+    $("tipo").value = m.tipo || "Entrata";
+    $("data").value = m.data || "";
+    $("riferimento").value = m.riferimento || "";
+    $("colli").value = m.colli ?? "";
+
+    $("formtitle").textContent = "Modifica movimento";
+    $("submit").textContent = "Salva modifiche";
+
+    $("cancel").classList.remove("hidden");
+
+    $("formcard").scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+
+  }
+
+  /* ELIMINA */
+
+  if(button.dataset.del){
+
+    const m = items.find(
+      x => x.id === button.dataset.del
+    );
+
+    if(!m) return;
+
+    if(confirm(
+      "Vuoi eliminare il movimento di " +
+      m.mobilificio + "?"
+    )){
+
+      items = items.filter(x => x.id !== m.id);
+
+      if(editing === m.id){
+        resetForm();
+      }
+
+      save();
+      render();
+
+    }
+
+  }
+
+});
+
+/* ANNULLA MODIFICA */
+
+$("cancel").addEventListener("click", resetForm);
+
+/* RICERCA AUTOMATICA */
+
+$("search").addEventListener("input", render);
+
+/* CANCELLA LA RICERCA */
+
+$("clear").addEventListener("click", function(){
+
+  $("search").value = "";
+
+  render();
+
+  $("search").focus();
+
+});
+
+/* CARICAMENTO DATI */
+
+try{
+
+  const saved = localStorage.getItem(KEY);
+
+  items = saved ? JSON.parse(saved) : [];
+
+  if(!Array.isArray(items)){
+    items = [];
+  }
+
+}catch(e){
+
+  items = [];
+
+}
+
+/* ESEMPIO INIZIALE, SOLO AL PRIMO AVVIO */
+
+if(!localStorage.getItem(KEY)){
+
+  items = [{
+    id: newId(),
+    mobilificio: "Albanese",
+    tipo: "Entrata",
+    data: today(),
+    riferimento: "Expo",
+    colli: 35
+  }];
+
+  save();
+
+}
+
+$("data").value = today();
+
+render();
 </script>
+
 </body>
+</html>
