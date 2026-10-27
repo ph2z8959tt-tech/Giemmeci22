@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giemmeci.22</title>
+<style>
+body{font-family:Arial;background:#f1f5f5;margin:0;color:#18343b}
+header{background:#087f5b;color:white;padding:24px;font-size:25px;font-weight:bold}
+main{padding:16px}
+button{padding:16px;border:0;border-radius:10px;font-weight:bold;font-size:16px;width:100%;margin:6px 0}
+.verde{background:#087f5b;color:white}
+.rosso{background:#d94848;color:white}
+input,select{width:100%;padding:13px;box-sizing:border-box;margin:6px 0 14px;border:1px solid #ccd8d9;border-radius:8px;font-size:16px}
+.box{background:white;padding:16px;border-radius:12px;margin:12px 0}
+</style>
+</head>
+<body>
+<header>Giemmeci.22<br><small>Gestione magazzino</small></header>
+<main>
+<div id="inizio" class="box">
+<h2>Elenco mobilifici</h2>
+<div id="clienti">Nessun mobilificio registrato.</div>
+<button class="verde" onclick="nuovo()">+ Nuovo movimento</button>
+</div>
+<div id="form" class="box" style="display:none">
+<h2 id="titolo">Nuovo movimento</h2>
+<button class="verde" onclick="tipo='Entrata';document.getElementById('titolo').innerText='Entrata merce'">ENTRATA MERCE</button>
+<button class="rosso" onclick="tipo='Uscita';document.getElementById('titolo').innerText='Uscita merce'">USCITA MERCE</button>
+<label>Data</label><input id="data" type="date">
+<label>Mobilificio</label><input id="mobilificio" placeholder="Nome mobilificio">
+<label>Azienda</label><input id="azienda" placeholder="Nome azienda">
+<label>Riferimento</label><input id="riferimento" placeholder="Numero o codice riferimento">
+<label>Numero colli</label><input id="colli" type="number" min="1" placeholder="Numero colli">
+<label>Note</label><input id="note" placeholder="Note facoltative">
+<button class="verde" onclick="salva()">SALVA MOVIMENTO</button>
+<button onclick="mostra()">ANNULLA</button>
+</div>
+<div class="box">
+<h2>Storico movimenti</h2>
+<div id="storico">Nessun movimento registrato.</div>
+</div>
+</main>
+<script>
+let tipo='Entrata';
+let movimenti=JSON.parse(localStorage.getItem('gm22')||'[]');
+function nuovo(){document.getElementById('form').style.display='block';document.getElementById('data').value=new Date().toISOString().slice(0,10)}
+function mostra(){document.getElementById('form').style.display='none'}
+function salva(){
+let m={tipo:tipo,data:data.value,cliente:mobilificio.value.trim(),azienda:azienda.value.trim(),riferimento:riferimento.value.trim(),colli:colli.value,note:note.value};
+if(!m.cliente||!m.azienda||!m.riferimento||!m.colli||Number(m.colli)<1){alert('Compila mobilificio, azienda, riferimento e colli.');return}
+movimenti.push(m);localStorage.setItem('gm22',JSON.stringify(movimenti));aggiorna();mostra();
+}
+function aggiorna(){
+let clienti=[...new Set(movimenti.map(m=>m.cliente))];
+document.getElementById('clienti').innerHTML=clienti.length?clienti.map(c=>'<div class="box">'+c+'</div>').join(''):'Nessun mobilificio registrato.';
+document.getElementById('storico').innerHTML=movimenti.length?[...movimenti].reverse().map(m=>'<div class="box"><b>'+m.tipo+' — '+m.cliente+'</b><br>'+m.data+' · '+m.azienda+'<br>Rif. '+m.riferimento+' · Colli: '+m.colli+(m.note?'<br>'+m.note:'')+'</div>').join(''):'Nessun movimento registrato.';
+}
+aggiorna();
+</script>
+</body>
+</html>
